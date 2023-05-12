@@ -8,10 +8,10 @@ on:
 
 jobs:
   package:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - name: cloning
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: set_up
         run: cd module3_task2 && sudo ./setup.sh
