@@ -1,28 +1,30 @@
-help: ## Show help command
-	@sed -ne '/@sed/!s/## //p' Makefile
-
-build:  ## Create Website
+# Implement the next steps for the actual Go-Hugo website's source code
+build: ## Generate the website from markdown and config files in the 'dist/' folder
 	@hugo
 
-clean:  ## Delete content of dist folder
-	@rm -rf dist/*
+clean: ## Cleanup the content of the 'dist/' folder
+	@rm -Rf dist/*
 
-post:  ## Create a post
-	@hugo new ./content/posts/$(POST_NAME).md
-	@sed -i '/title:*/c\title: "$(POST_TITLE)"' ./content/posts/$(POST_NAME).md
+post: ## Create a new blog post using POST_TITLE and POST_NAME env variables
+	@rm -Rf content/posts/$(POST_NAME).md
+	@hugo new posts/$(POST_NAME).md
+	@sed -i 's/title:.*/title: $(POST_TITLE)/' content/posts/$(POST_NAME).md
+	@sed -i 's/draft:.*/draft: "false"/' content/posts/$(POST_NAME).md
 
-package: ## zip website
+package: ## Produce a zip file containing the 'dist/' folder
 	@hugo
-	@zip awesome-website.zip ./dist
+	@zip -r awesome-website.zip dist/
 
-lint: ## lint with markdown
-	@markdownlint README.md
-	@markdownlint DEPLOY.md
+lint: ## Check markdown files for any syntax mistake
+	@markdownlint README.md DEPLOY.md
 
-unit-tests: ## test file
+unit-tests: ## Run unit-tets of the project
 
+integration-tests: ## Run integration-tests of the project
 
-integration-tests: ## integrate file
+validate: ## Validate the project
 
-
-validate: ## valide file
+help: ## Show this help usage
+	@echo "Usage: make <command>"
+	@echo "-----"
+	@fgrep -h "##" Makefile | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//' | head -9
