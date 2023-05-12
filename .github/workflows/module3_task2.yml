@@ -5,6 +5,7 @@ on:
     - cron: "0 0 * * *"
 jobs:
   module3_task2:
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
@@ -13,6 +14,7 @@ jobs:
       - run: cd module3_task2 && make build
       - run: cd module3_task2 && make test
       - run: cd module3_task2 && make help
+      - run: cd module3_task2 && make lint
       - run: cd module3_task2 && make package
       - uses: actions/upload-artifact@v3
         with:
