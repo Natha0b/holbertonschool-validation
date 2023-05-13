@@ -1,6 +1,7 @@
 # Awesome Inc. website Docs
 
 ## Lifecycle
+
 *clean: Cleanup the content
 *build: Generates the website from the markdown and configuration files"
 *post: creates a new blog post
@@ -12,10 +13,12 @@
 *validate:
 
 ## Prerequisites
+
     GNU Make in version 3.81+
     Go Hugo v0.80+
 
 ## Workflow
+
     The workflow is executed into Ubuntu 18.04 environment
     Required tools are installed prior to any make target
     by executing the script setup.sh
