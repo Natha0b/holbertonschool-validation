@@ -13,7 +13,9 @@ permissions: read-all
 jobs:
   builds:
     name: jobs
-    runs-on: ubuntu-18.04
+    runs-on: 
+      - ubuntu-lastest
+      - ubuntu-18.04
 
     steps:
       - uses: actions/checkout@v3
