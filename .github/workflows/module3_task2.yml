@@ -12,11 +12,8 @@ permissions: read-all
 
 jobs:
   builds:
-    strategy:
-      matrix:
-        ubuntu_version: [22.04, 18.04]
-
-    runs-on: ubuntu-${{ matrix.ubuntu_version }}
+    name: jobs
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v3
