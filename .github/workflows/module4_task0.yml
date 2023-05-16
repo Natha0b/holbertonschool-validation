@@ -12,7 +12,7 @@ on:
       - opened
 jobs:
   module4_task0:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
