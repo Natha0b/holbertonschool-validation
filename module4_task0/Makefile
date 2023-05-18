@@ -7,7 +7,7 @@ hugo-build: ## Generates the static site using go hugo
 build: ## Generate the website from the markdown and configuration files in the directory dist/ and compile the source code of the application to a binary named awesome-api
 	@make check
 	@make lint
-	-@make go-build
+	@make go-build
 	-@make hugo-build
 
 clean: ## Cleanup the content of the directory dist/, the binary awesome-api and the log file awesome-api.log
