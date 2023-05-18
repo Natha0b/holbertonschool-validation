@@ -41,14 +41,14 @@ lint:	## Lints all the go files using golangci-lint
 	markdownlint README.md DEPLOY.md
 
 unit-tests:	## Runs implemented unit test using go test
-	docker run --rm --volume=$(shell pwd):/app --workdir=/app golang:1.15.8-buster go test -v -short -coverprofile=coverage-units.out
+	@docker run --volume=$(shell pwd):/app --workdir=/app golang:latest go test -v -short -coverprofile=coverage-units.out
 
 integration-tests:	## Runs integration test using go test
-	docker run --rm --volume=$(shell pwd):/app --workdir=/app golang:1.15.8-buster go test -v -coverprofile=coverage-integrations.out
+	@docker run --volume=$(shell pwd):/app --workdir=/app golang:latest go test -v -coverprofile=coverage-integrations.out
 
 package:  ## Generates a zip archive to deployment
-	-make build
-	zip awesome-website.zip awesome-api dist/
+	@make build
+	@zip awesome-website.zip awesome-api ./dist/
 
 help:	## Show this help message
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
