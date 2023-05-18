@@ -1,14 +1,14 @@
-go-build: ## Generates the API binary from golang files
-	@docker run --volume=$(shell pwd):/app --workdir=/app golang:latest go build
-
-hugo-build: ## Generates the static site using go hugo
-	@hugo
-
 build: ## Generate the website from the markdown and configuration files in the directory dist/ and compile the source code of the application to a binary named awesome-api
 	@make check
 	@make lint
 	@make go-build
 	@make hugo-build
+
+go-build: ## Generates the API binary from golang files
+	@docker run --volume=$(shell pwd):/app --workdir=/app golang:latest go build
+
+hugo-build: ## Generates the static site using go hugo
+	@hugo
 
 clean: ## Cleanup the content of the directory dist/, the binary awesome-api and the log file awesome-api.log
 	-@make stop
@@ -32,12 +32,12 @@ test: ## Check expected behaviour of the app
 	@make validate
 
 lint: ## Static linting on go files using golangci-lint
-	@markdownlint README.md DEPLOY.md
+	@markdownlint *.md
 
-unit-tests: ## execute (successfully) the Golang unit tests
-	@docker run --volume=$(shell pwd):/app --workdir=/app golang:latest go test -v -short -coverprofile=coverage-units.out
+unit-tests: ## Execute (successfully) the Golang unit tests
+	@docker run --volume=$(shell pwd):/app --workdir=/app golang:latest go test -v -short -coverprofile=coverage-units.out     
 
-integration-tests: ## execute the Golang integration tests
+integration-tests: ## Execute the Golang integration tests
 	@docker run --volume=$(shell pwd):/app --workdir=/app golang:latest go test -v -coverprofile=coverage-integrations.out
 
 check: ## Markdown linting on syntax and dead links
@@ -45,11 +45,11 @@ check: ## Markdown linting on syntax and dead links
 	@markdownlint ./content/posts/*
 
 validate: ## should validate the file ./dist/index.html by using the command line Holberton’s W3C Validator
-	@-w3c_validator.py ./dist/index.html
+	@-./w3c_validator.py ./dist/index.html
 
-package: ## Creates a zip file that contains lis needed files to deply the website
+package: ## Creates a zip file that contains the needed files to deply the website
 	@make build
 	@zip awesome-website.zip awesome-api ./dist/
 
-help: ## Shows this help message
+help: ## Shows help message
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
