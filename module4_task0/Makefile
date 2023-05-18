@@ -1,57 +1,53 @@
-go-build:	## Builds the API binary file using go
+go-build: ## Generates the API binary from golang files
 	@docker run --volume=$(shell pwd):/app --workdir=/app golang:latest go build
 
-hugo-build:		## Builds a website using gohugo on the dist folder
+hugo-build: ## Generates the static site using go hugo
 	@hugo
 
-build:	## Builds all that is needed for website
-	@make check
-	@make lint
-	@make go-build
-	@make hugo-build
+build: ## Generate the website from the markdown and configuration files in the directory dist/ and compile the source code of the application to a binary named awesome-api
+	-make go-build
+	make hugo-build
 
-post:		## Create a new blog post whose filename and title come from the environment variables POST_TITLE and POST_NAME
+clean: ## Cleanup the content of the directory dist/, the binary awesome-api and the log file awesome-api.log
+	-@make stop
+	-@rm -rf ./dist
+	-@rm ./awesome-api ./awesome-api.log ./coverage-units.out 
+
+post: ## Create a new blog post whose filename and title come from the environment variables POST_TITLE and POST_NAME.
 	@hugo new posts/${POST_NAME}.md
-	@sed -i "s/title: .*/title: ${POST_TITLE}/" ./content/posts/${POST_NAME}.md
+	@sed -i 's/^title:.*/title: ${POST_TITLE}/g' ./content/posts/${POST_NAME}.md
 
-check:  ## Lints and check for dead links on markdowns using markdownlint-cli and markdown-link-check
-	@markdownlint ./content/posts/*.md
-	@markdown-link-check ./content/posts/*.md
-
-validate: ## Validates dist/index.html using W3C Hbtn validator
-	@make build
-	@git clone https://github.com/holbertonschool/W3C-Validator.git
-	@./W3C-Validator/w3c_validator.py ./dist/index.html
-	@rm -rf ./W3C-Validator
-
-run:	## Runs the built binary and send everything to awesome.log
+run: ## Run the application in background by executing the binary awesome-api, and write logs into a file named awesome-api.log
 	@make build
 	@./awesome-api >./awesome-api.log 2>&1 &
 
-stop:	## Terminates the execution of awesome-api
-	@kill $(shell pgrep awesome-api)
+stop: ## Stop the application with the command kill XXXXX where XXXXX is the Process ID of the application. 
+	@kill "$(shell pgrep awesome-api)"
 
-clean:	## Removes binary and logs
-	-@make stop
-	-@rm -rf awesome-api awesome.log coverage* go* awesome-website.zip ./dist
-
-test:	## Tests API using go test
-	@make build
+test: ## Check expected behaviour of the app
 	@make unit-tests
 	@make integration-tests
+	@make validate
 
-lint:	## Lints all the go files using golangci-lint
+lint: ## Static linting on go files using golangci-lint
 	@markdownlint README.md DEPLOY.md
 
-unit-tests:	## Runs implemented unit test using go test
+unit-tests: ## execute (successfully) the Golang unit tests
 	@docker run --volume=$(shell pwd):/app --workdir=/app golang:latest go test -v -short -coverprofile=coverage-units.out
 
-integration-tests:	## Runs integration test using go test
+integration-tests: ## execute the Golang integration tests
 	@docker run --volume=$(shell pwd):/app --workdir=/app golang:latest go test -v -coverprofile=coverage-integrations.out
 
-package:  ## Generates a zip archive to deployment
+check: ## Markdown linting on syntax and dead links
+	@markdown-link-check ./content/posts/*
+	@markdownlint ./content/posts/*
+
+validate: ## should validate the file ./dist/index.html by using the command line Holberton’s W3C Validator
+	@-w3c_validator.py ./dist/index.html
+
+package: ## Creates a zip file that contains lis needed files to deply the website
 	@make build
 	@zip awesome-website.zip awesome-api ./dist/
 
-help:	## Show this help message
+help: ## Shows this help message
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
