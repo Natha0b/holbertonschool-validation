@@ -5,6 +5,8 @@ hugo-build:		## Builds a website using gohugo on the dist folder
 	@hugo
 
 build:	## Builds all that is needed for website
+	@make check
+	@make lint
 	@make go-build
 	@make hugo-build
 
