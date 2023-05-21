@@ -1,3 +1,5 @@
+.PHONY: lint docker-tests
+
 build-docker: ## Generates the right Docker image to work with the project
 	docker build -t awesome:build ./.build
 
@@ -56,8 +58,11 @@ package: ## Creates a zip file that contains lis needed files to deply the websi
 	@make build
 	@zip awesome-website.zip awesome-api ./dist/
 
-docker-tests: ## Tests the created image on docker build using container-structure-test
-	@container-structure-test test --image awesome:build --config ./.build/cst.yml
+lint:
+    docker run --rm -i hadolint/hadolint < .build/Dockerfile
 
+docker-tests:
+    docker build -t my-image -f .build/Dockerfile .
+    docker run --rm -v $(shell pwd):/tests my-image pytest -c /.build/cst.yml
 help: ## Shows this help message
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
