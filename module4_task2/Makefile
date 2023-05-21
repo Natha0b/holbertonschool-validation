@@ -40,10 +40,10 @@ lint: ## Static linting on go files using golangci-lint
 	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build markdownlint README.md DEPLOY.md
 
 unit-tests: ## execute (successfully) the Golang unit tests
-	-@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build go test -v -short -coverprofile=coverage-units.out
+	docker run --rm --volume=$(shell pwd):/app --workdir=/app awesome:build go test -v -short -coverprofile=coverage-units.out
 
 integration-tests: ## execute the Golang integration tests
-	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build go test -v -coverprofile=coverage-integrations.out
+	docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build go test -v -coverprofile=coverage-integrations.out
 
 check: ## Markdown linting on syntax and dead links
 	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build markdown-link-check ./content/posts/*
