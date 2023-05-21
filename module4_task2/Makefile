@@ -8,7 +8,7 @@ hugo-build:		## Builds a website using gohugo on the dist folder
 	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build hugo
 
 build:	## Builds all that is needed for website
-	make go-build
+	-make go-build
 	-make hugo-build
 
 post:		## Create a new blog post whose filename and title come from the environment variables POST_TITLE and POST_NAME
