@@ -58,9 +58,6 @@ package: ## Creates a zip file that contains lis needed files to deply the websi
 	@make build
 	@zip awesome-website.zip awesome-api ./dist/
 
-lint:
-    docker run --rm -i hadolint/hadolint < .build/Dockerfile
-
 docker-tests:
     docker build -t my-image -f .build/Dockerfile .
     docker run --rm -v $(shell pwd):/tests my-image pytest -c /.build/cst.yml
