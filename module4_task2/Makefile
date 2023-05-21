@@ -1,5 +1,3 @@
-.PHONY: lint docker-tests
-
 build-docker: ## Generates the right Docker image to work with the project
 	docker build -t awesome:build ./.build
 
