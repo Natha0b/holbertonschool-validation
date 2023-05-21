@@ -1,66 +1,63 @@
-.PHONY: build
+build-docker: ## Generates the right Docker image to work with the project
+	docker build -t awesome:build ./.build
 
-go-build:	## Builds the API binary file using go
+go-build: ## Generates the API binary from golang files
 	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build go build
 
-
-hugo-build:		## Builds a website using gohugo on the dist folder
+hugo-build: ## Generates the static site using go hugo
 	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build hugo
 
-build:	## Builds all that is needed for website
-	-make go-build
-	-make hugo-build
+build: ## Generate the website from the markdown and configuration files in the directory dist/ and compile the source code of the application to a binary named awesome-api
+	@make check
+	@make lint
+	@make go-build
+	-@make hugo-build
 
-post:		## Create a new blog post whose filename and title come from the environment variables POST_TITLE and POST_NAME
-	docker run --rm --volume=$(shell pwd):/app --workdir=/app awesome:build hugo new posts/${POST_NAME}.md
-	sed -i "s/title: .*/title: ${POST_TITLE}/" ./content/posts/${POST_NAME}.md
+clean: ## Cleanup the content of the directory dist/, the binary awesome-api and the log file awesome-api.log
+	-@make stop
+	-@rm -rf ./dist
+	-@rm ./awesome-api ./awesome-api.log ./coverage-units.out 
 
-check:  ## Lints and check for dead links on markdowns using markdownlint-cli and markdown-link-check
-	docker run --rm --volume=$(shell pwd):/app --workdir=/app awesome:build markdownlint ./content/posts/*.md
-	docker run --rm --volume=$(shell pwd):/app --workdir=/app awesome:build markdown-link-check ./content/posts/*.md
+post: ## Create a new blog post whose filename and title come from the environment variables POST_TITLE and POST_NAME.
+	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build hugo new posts/${POST_NAME}.md
+	@sed -i 's/^title:.*/title: ${POST_TITLE}/g' ./content/posts/${POST_NAME}.md
 
-validate: ## Validates dist/index.html using W3C Hbtn validator
-	-make build
-	-git clone https://github.com/holbertonschool/W3C-Validator.git
-	-./W3C-Validator/w3c_validator.py ./dist/index.html
-	-rm -rf ./W3C-Validator
+run: ## Run the application in background by executing the binary awesome-api, and write logs into a file named awesome-api.log
+	@make build
+	@./awesome-api >./awesome-api.log 2>&1 &
 
-run:	## Runs the built binary and send everything to awesome.log
-	./awesome-api >./awesome.log 2>&1 &
+stop: ## Stop the application with the command kill XXXXX where XXXXX is the Process ID of the application. 
+	@kill "$(shell pgrep awesome-api)"
 
-stop:	## Terminates the execution of awesome-api
-	kill $(shell pgrep awesome-api)
+test: ## Check expected behaviour of the app
+	@make unit-tests
+	@make integration-tests
+	@make validate
 
-clean:	## Removes binary and logs
-	-make stop
-	-rm -rf awesome-api awesome.log coverage* go* awesome-website.zip ./dist
+lint: ## Static linting on go files using golangci-lint
+	@make build-docker
+	@docker run --rm -i hadolint/hadolint < ./.build/Dockerfile
+	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build markdownlint README.md DEPLOY.md
 
-test:	## Tests API using go test
-	-make build
-	make unit-tests
-	make integration-tests
+unit-tests: ## execute (successfully) the Golang unit tests
+	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build go test -v -short -coverprofile=coverage-units.out
 
-lint:	## Lints all the go files using golangci-lint
-	-make build-docker
-	docker run --rm --volume=$(shell pwd):/app --workdir=/app awesome:build markdownlint README.md DEPLOY.md
-	docker run --rm --volume=$(shell pwd):/app --workdir=/app hadolint/hadolint hadolint build/Dockerfile
+integration-tests: ## execute the Golang integration tests
+	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build go test -v -coverprofile=coverage-integrations.out
 
-unit-tests:	## Runs implemented unit test using go test
-	docker run --rm --volume=$(shell pwd):/app --workdir=/app awesome:build go test -v -short -coverprofile=coverage-units.out
+check: ## Markdown linting on syntax and dead links
+	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build markdown-link-check ./content/posts/*
+	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build markdownlint ./content/posts/*
 
-integration-tests:	## Runs integration test using go test
-	docker run --rm --volume=$(shell pwd):/app --workdir=/app awesome:build go test -v -coverprofile=coverage-integrations.out
+validate: ## should validate the file ./dist/index.html by using the command line Holberton’s W3C Validator
+	@-w3c_validator.py ./dist/index.html
 
-package:  ## Generates a zip archive to deployment
-	-make build
-	zip awesome-website.zip awesome-api dist/
+package: ## Creates a zip file that contains lis needed files to deply the website
+	@make build
+	@zip awesome-website.zip awesome-api ./dist/
 
-build-docker:	## Builds a Docker image from Dockerfile on build directory
-	docker build -t awesome:build ./build
+docker-tests: ## Tests the created image on docker build using container-structure-test
+	@container-structure-test test --image awesome:build --config ./.build/cst.yml
 
-docker-tests:	## Test the generated docker image using container-structure-test and cst.yml config file
-	-make build-docker
-	container-structure-test test --image awesome:build --config build/cst.yml
-
-help:	## Show this help message
+help: ## Shows this help message
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
