@@ -1,10 +1,11 @@
 .PHONY: build
 
 go-build:	## Builds the API binary file using go
-	docker run --rm --volume=$(shell pwd):/app --workdir=/app awesome:build /bin/bash -c "go mod init github.com/paosua86/awesome-api && go get github.com/gorilla/mux && go build"
+	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build go build
+
 
 hugo-build:		## Builds a website using gohugo on the dist folder
-	docker run --rm --volume=$(shell pwd):/app --workdir=/app awesome:build hugo
+	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build hugo
 
 build:	## Builds all that is needed for website
 	make go-build
