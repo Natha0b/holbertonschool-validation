@@ -4,7 +4,7 @@ IMAGE_TAG=$(shell git rev-parse --abbrev-ref HEAD)
 endif
 
 build-docker: ## Generates the right Docker image to work with the project
-	docker build -t awesome:build -f ./build/Dockerfile - < ./build
+	docker build -t awesome:build -f ./build/Dockerfile ./build
 
 go-build: ## Generates the API binary from golang files
 	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build go build
@@ -41,7 +41,7 @@ test: ## Check expected behaviour of the app
 
 lint: ## Static linting on go files using golangci-lint
 	@make build-docker
-	@docker run --rm -i hadolint/hadolint < ./.build/Dockerfile
+	@docker run --rm -i hadolint/hadolint < ./build/Dockerfile
 	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build markdownlint README.md DEPLOY.md
 
 unit-tests: ## execute (successfully) the Golang unit tests
