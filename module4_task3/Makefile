@@ -62,7 +62,7 @@ package: ## Creates a zip file that contains lis needed files to deply the websi
 	@zip awesome-website.zip awesome-api ./dist/
 
 docker-tests: ## Tests the created image on docker build using container-structure-test
-	@container-structure-test test --image awesome:build --config ./.build/cst.yml
+	@container-structure-test test --image awesome:build --config ./build/cst.yml
 
 help: ## Shows this help message
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
