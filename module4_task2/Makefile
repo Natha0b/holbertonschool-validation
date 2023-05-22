@@ -1,5 +1,5 @@
 build-docker: ## Generates the right Docker image to work with the project
-	docker build -t awesome:build ./build
+	docker build -t awesome:build ./.build
 
 go-build: ## Generates the API binary from golang files
 	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build go build
@@ -36,7 +36,7 @@ test: ## Check expected behaviour of the app
 
 lint: ## Static linting on go files using golangci-lint
 	@make build-docker
-	@docker run --rm -i hadolint/hadolint < ./build/Dockerfile
+	@docker run --rm -i hadolint/hadolint < ./.build/Dockerfile
 	@docker run --volume=$(shell pwd):/app --workdir=/app --rm awesome:build markdownlint README.md DEPLOY.md
 
 unit-tests: ## execute (successfully) the Golang unit tests
@@ -57,7 +57,7 @@ package: ## Creates a zip file that contains lis needed files to deply the websi
 	@zip awesome-website.zip awesome-api ./dist/
 
 docker-tests: ## Tests the created image on docker build using container-structure-test
-	@container-structure-test test --image awesome:build --config ./build/cst.yml
+	@container-structure-test test --image awesome:build --config ./.build/cst.yml
 
 help: ## Shows this help message
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
